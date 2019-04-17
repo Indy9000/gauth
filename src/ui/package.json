@@ -1,0 +1,15 @@
+{
+  "name": "gauth",
+  "version": "1.0.0",
+  "description": "template application for google auth",
+  "main": "hello.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Indy Garcia",
+  "license": "ISC",
+  "dependencies": {
+    "@types/gapi.auth2": "0.0.50",
+    "@types/knockout": "^3.4.65"
+  }
+}
