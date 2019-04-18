@@ -107,55 +107,69 @@ type IDTokenClaims struct {
 	Locale        string `json:"locale"`         //"en"
 }
 
-func (us *Service) validateIDToken(idtoken string) (*IDTokenClaims, error) {
+func validateIDToken(idtoken string, clientID string) (*IDTokenClaims, error) {
 	url := fmt.Sprintf("https://oauth2.googleapis.com/tokeninfo?id_token=%s", idtoken)
 
 	resp, err := http.Get(url)
 	if err != nil {
-		// w.WriteHeader(http.StatusInternalServerError)
-		// fmt.Println(`{"status":"unauthorised","reason":"bearer token could not be validated with https://oauth2.googleapis.com"}`)
 		return nil, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusOK {
-		// w.WriteHeader(http.StatusOK)
-
 		body, err1 := ioutil.ReadAll(resp.Body)
 		if err1 != nil {
-			// w.WriteHeader(http.StatusInternalServerError)
-			// fmt.Println(`{"status":"unauthorised","reason":"bearer token could not be validated with https://oauth2.googleapis.com"}`)
 			return nil, err1
 		}
 		var claims IDTokenClaims
 		err2 := json.Unmarshal(body, &claims)
 		if err2 != nil {
-			// w.WriteHeader(http.StatusInternalServerError)
-			// fmt.Println(`{"status":"unauthorised","reason":"could not unmarshal idtoken claims response"}`)
 			return nil, err2
 		}
 
-		//TODO: check AUD against google clientID
-		if claims.AUD != us.clientID {
+		if claims.AUD != clientID {
 			return nil, fmt.Errorf("ClientIDs don't match. Auth failed")
 		}
 
 		return &claims, nil
 	}
 	return nil, fmt.Errorf("Error authenticating. Google returned: %s", resp.Status)
-	// w.WriteHeader(http.StatusUnauthorized)
-	// fmt.Println(`{"status":"unauthorised","reason":"authentication failed with google servers."}`)
-
 }
 
-func createSessionKey(claims *IDTokenClaims) (string, error) {
+func createSessionKey() (string, error) {
 	// Create a new random session token
 	id, err := uuid.NewV4()
 	if err != nil {
-		// w.WriteHeader(http.StatusInternalServerError)
-		// fmt.Fprintf(w, `{"status":"failed","reason":"unable to generate session token"}`)
 		return "", err
 	}
 	return id.String(), nil
+}
+
+// validateAndGetSessionToken takes bearer token and returns a session token
+func validateAndGetSessionToken(bearerToken string, clientID string) (string, *Profile, error) {
+	if bearerToken == "" {
+		return "", nil, fmt.Errorf(`{"status":"unauthorised","reason":"no bearer token"}`)
+	}
+	splitToken := strings.Split(bearerToken, "Bearer")
+	token := strings.TrimSpace(splitToken[1])
+	fmt.Printf("found token:<%s>\n", token)
+
+	claims, err := validateIDToken(token, clientID)
+	if err != nil {
+		return "", nil, fmt.Errorf(`{"status":"unauthorised","reason":"authentication failed error:<%s>"}`, err.Error())
+	}
+	fmt.Printf("SUCCESS authenticating\n")
+	sessionKey, err1 := createSessionKey()
+	if err1 != nil {
+		return "", nil, fmt.Errorf(`{"status":"failed","reason":"unable to generate session token.Error:<%s>"}`, err1.Error())
+	}
+
+	p := &Profile{
+		UserName:     claims.Name,
+		UniqueUserID: "google-oauth2|" + claims.SUB,
+		PhotoURL:     claims.Picture,
+	}
+
+	return sessionKey, p, nil
 }
 
 // HandleUserAuth validates the id token
@@ -163,39 +177,19 @@ func (us *Service) HandleUserAuth(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost: //validate idtoken
 		bearerToken := r.Header.Get("Authorization")
-		if bearerToken == "" {
+
+		sessionKey, profile, e0 := validateAndGetSessionToken(bearerToken, us.clientID)
+		if e0 != nil {
 			w.WriteHeader(http.StatusUnauthorized)
-			fmt.Println(`{"status":"unauthorised","reason":"no bearer token"}`)
+			fmt.Println(e0.Error())
 			return
 		}
-		splitToken := strings.Split(bearerToken, "Bearer")
-		token := strings.TrimSpace(splitToken[1])
-		fmt.Printf("found token:<%s>\n", token)
 
-		claims, err := us.validateIDToken(token)
-		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			fmt.Printf(`{"status":"unauthorised","reason":"authentication failed error:<%s>"}\n`, err.Error())
-			return
-		}
-		fmt.Printf("SUCCESS authenticating\n")
-		sessionKey, err1 := createSessionKey(claims)
-		if err1 != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Println(`{"status":"failed","reason":"unable to generate session token"}`)
-		}
-
-		p := &Profile{
-			UserName:     claims.Name,
-			UniqueUserID: "google-oauth2|" + claims.SUB,
-			PhotoURL:     claims.Picture,
-		}
-
-		us.sessionCache.Set(sessionKey, p)
-		b, e := json.Marshal(*p)
+		us.sessionCache.Set(sessionKey, profile)
+		b, e := json.Marshal(*profile)
 		if e != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, `{"status":"failed","reason":"unable marshal user profile to json"}`)
+			fmt.Println(`{"status":"failed","reason":"unable marshal user profile to json"}`)
 		}
 
 		// Finally, we set the client cookie for "session_token" as the session token we just generated
@@ -212,3 +206,5 @@ func (us *Service) HandleUserAuth(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+//TODO create tests
