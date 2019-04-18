@@ -27,9 +27,9 @@ type Service struct {
 }
 
 // NewService creates Service object
-func NewService(sessionExpiry time.Duration, clientID string) *Service {
+func NewService(cache *storage.SessionCache, sessionExpiry time.Duration, clientID string) *Service {
 	return &Service{
-		sessionCache:     storage.NewSessionCache(sessionExpiry),
+		sessionCache:     cache,
 		sessionKeyExpiry: sessionExpiry,
 		clientID:         clientID,
 	}
