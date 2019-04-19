@@ -60,6 +60,7 @@ func (us *Service) HandleUser(w http.ResponseWriter, r *http.Request) {
 		if e1 != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Printf(`{"status":"failed","reason":"%s"}\n`, e1.Error())
+			return
 		}
 		p := us.getProfile(sessionToken)
 		if p == nil {
@@ -77,6 +78,7 @@ func (us *Service) HandleUser(w http.ResponseWriter, r *http.Request) {
 		ii, e := w.Write(b)
 		if e != nil {
 			fmt.Printf("Error writing. <%s>\n", e.Error())
+			return
 		}
 		fmt.Printf("w.Write ii:<%d> b.len:<%d>\n", ii, len(string(b)))
 	case http.MethodPost: //create user
