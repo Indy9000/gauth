@@ -197,9 +197,13 @@ func (us *Service) HandleUserAuth(w http.ResponseWriter, r *http.Request) {
 		// Finally, we set the client cookie for "session_token" as the session token we just generated
 		// we also set an expiry time of 120 seconds, the same as the cache
 		http.SetCookie(w, &http.Cookie{
-			Name:    "session_token",
-			Value:   sessionKey,
-			Expires: time.Now().UTC().Add(us.sessionKeyExpiry),
+			Name:     "session_token",
+			Value:    sessionKey,
+			Expires:  time.Now().UTC().Add(us.sessionKeyExpiry),
+			Path:     "/api/",
+			SameSite: http.SameSiteStrictMode,
+			// Secure:   true,
+			// Domain:   "poplar.one",
 		})
 
 		_, e1 := w.Write(b)
