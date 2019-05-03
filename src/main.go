@@ -12,7 +12,7 @@ import (
 func main() {
 	//TODO: read this from command line
 	clientID := "16744246186-lhn5hokpb3k1i49g9pnspo4h9h3rt28f.apps.googleusercontent.com"
-	sessionExpiry := time.Second * 120
+	sessionExpiry := time.Second * 60 * 15
 
 	cache := storage.NewSessionCache(sessionExpiry)
 	us := user.NewService(cache, sessionExpiry, clientID)
