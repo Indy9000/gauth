@@ -153,7 +153,7 @@ func validateAndGetSessionToken(bearerToken string, clientID string) (string, *P
 	}
 	splitToken := strings.Split(bearerToken, "Bearer")
 	token := strings.TrimSpace(splitToken[1])
-	fmt.Printf("found token:<%s>\n", token)
+	fmt.Printf("found bearer token:<%s>\n", token)
 
 	claims, err := validateIDToken(token, clientID)
 	if err != nil {
