@@ -13,10 +13,14 @@ tsc --strict
 cd - > /dev/null
 echo "copying files ..."
 mkdir -p ./bin/ui
+mkdir -p ./bin/ui/img
+
 cp -R src/ui/built ./bin/ui
 cp -R src/ui/externals ./bin/ui
 # cp -R src/ui/favicon ./bin/ui
 cp src/ui/*.html ./bin/ui
-# cp src/ui/*.css ./bin/ui
+cp src/ui/*.css ./bin/ui
 # cp src/ui/*.js ./bin/ui
+
+cp src/ui/img/* ./bin/ui/img/
 echo "SUCCESS"
