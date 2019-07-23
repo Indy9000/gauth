@@ -19,6 +19,7 @@ func main() {
 
 	http.HandleFunc("/api/user", us.HandleUser)
 	http.HandleFunc("/api/user/auth", us.HandleUserAuth)
+	http.HandleFunc("/api/user/signup", us.HandleUserAuth) // TODO: this perhaps need a separate handler that creates and entry on a `user-settings` table
 
 	http.Handle("/", http.FileServer(http.Dir("ui/")))
 	fmt.Printf("Listening on 80\n")
