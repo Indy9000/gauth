@@ -203,7 +203,7 @@ func (us *Service) HandleUserAuth(w http.ResponseWriter, r *http.Request) {
 			Path:     "/api/",
 			SameSite: http.SameSiteStrictMode,
 			// Secure:   true,
-			// Domain:   "poplar.one",
+			// Domain:   "www.your-domain-name.com",
 		})
 
 		_, e1 := w.Write(b)

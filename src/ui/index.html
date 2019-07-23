@@ -5,30 +5,100 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>My HTML App Template</title>
-  <meta name="description" content="My HTML App Template">
+  <title>My Awesome App template</title>
+  <meta name="description" content="My Awesome App template">
   <meta name="author" content="indy9000">
 
-  <meta name="google-signin-scope" content="profile email">
-  <meta name="google-signin-client_id" content="16744246186-lhn5hokpb3k1i49g9pnspo4h9h3rt28f.apps.googleusercontent.com">
-  <script src="https://apis.google.com/js/platform.js" async defer></script>
-
-  <!-- <link rel="stylesheet" href="styles.css" type="text/css"> -->
+  <script src="https://apis.google.com/js/api:client.js"></script>
 </head>
 
 <body>
-    <div style="width:100px">
-        <img data-bind="attr:{src: $root.userProfile().PhotoURL}" style="width:100%">
-        <div class="user-profile-container">
-            <h4><b><span data-bind="text: $root.userProfile().UserName"></span></b></h4> 
-        </div>
-        <div id="my-signin2"></div>
-    </div>
+    <main>
+        <!-- Landing page-->
+        <section id="landing" data-bind="with: authMgr">
+        <article data-bind="visible: !isSignedUp()">
+            <head>
+                <link rel="stylesheet" href="signup-styles.css" type="text/css">
+            </head>
+
+            <section id="app-features-copywrite">
+                <p>Describe why some one should sign up for your service</p>
+            </section>
+
+            <!-- Call to action-->
+            <section id="call-to-action">
+                <div> <!-- select the action-->
+                    <div><input type="radio" name="ctaGroup" value="Sign up" data-bind="checked: ctaCategory"/>Sign-up</div>
+                    <div><input type="radio" name="ctaGroup" value="Sign in" data-bind="checked: ctaCategory"/>Sign-in</div>
+                </div>
+
+                <!-- Sign up-->
+                <section id="signup" data-bind="visible: ctaCategory() == 'Sign up'">
+                    <p>Sign up to beta and use it today!</p>
+                    <div id="disclosure">
+                        <p>When you sign up with Google Identities, we get the following information:</p>
+            
+                        <ul>
+                            <li>a UserId to uniquely identify you, </li>
+                            <li>User Name</li>
+                            <li>and a link to the Profile Picture associated with the selected Google Account. </li>
+                        </ul> 
+                            
+                        <p>The user name and profile picture is shown only to you and they are stored on your device.</p>
+                        <p>We don't store any personaly identifiable information (PII) on our servers.</p>
+                        <p>
+                            By signing up, you agree to our <a href="terms.html">Terms and Conditions</a> 
+                            and the <a href="privacy.html">Privacy Policy</a>
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Sign in-->
+                <section id="signin" data-bind="visible: ctaCategory() == 'Sign in'">
+                    <p>If you already have an account, </p>
+                </section>
+                
+                <!-- google button-->
+                <section id="google-button">
+                    <!-- Here we display the button for both occasions -->
+                    <span class="label" data-bind="text: ctaCategory"></span><span> with a </span>
+                    <div id="Google-SignInButton" class="customGPlusSignIn">
+                        <span class="icon"></span>
+                        <span class="buttonText">Google Account</span>
+                    </div>
+                </section>
+                <section id="notifications">
+                    <span class="notification" data-bind="text: authErrorNotificication"></span>
+                </section>
+                <footer>
+                    <nav><!-- navigation -->
+                        <ul class="footer-list">
+                            <li>© 2019 Redsprint</li>
+                            <li><a href="terms.html">Terms and Conditions</a></li>
+                            <li><a href="privacy.html">Privacy Policy</a></li>
+                        </ul>
+                    </nav>
+                </footer>
+            </section>
+        </article>
+        </section>
+
+        <!-- MAIN APP UI-->
+        <section id="app" data-bind="visible: authMgr().isSignedUp">
+            <div style="width:100px">
+                <img data-bind="attr:{src: authMgr().userProfile().PhotoURL}" style="width:100%">
+                <div class="user-profile-container">
+                    <h4><b><span data-bind="text: authMgr().userProfile().UserName"></span></b></h4> 
+                </div>
+            </div>
+        </section>
+    </main>
+
 
     <script src="./externals/require.js"></script>
     <script src="./built/require-config.js"></script>
     <script>
-        require(["built/hello"]);
+        require(["built/index"]);
     </script>
   
 </body>

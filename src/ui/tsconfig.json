@@ -8,6 +8,6 @@
     },
     "files": [
         "./require-config.ts",
-        "./hello.ts"
+        "index.ts"
     ]
 }

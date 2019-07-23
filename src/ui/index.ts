@@ -1,17 +1,22 @@
 import * as ko from "knockout";
+import { AuthManager } from "./auth-manager";
+import { UserProfile } from "./user-profile";
 
-class UserProfile {
-	UniqueUserID:string
-	UserName:string
-    PhotoURL:string
-
+class MainViewModel{
+    authMgr:KnockoutObservable<AuthManager>
     constructor(){
-        this.UniqueUserID=""
-        this.UserName=""
-        this.PhotoURL=""
+        let el = document.getElementById("Google-SignInButton")
+        if (el){
+            this.authMgr= ko.observable( new AuthManager(el) )
+        }else{
+            throw new Error('ERROR: HTML must contain an element with id `Google-SignInButton`');
+        }
     }
 }
 
+ko.applyBindings(new MainViewModel())
+
+/*
 class HelloViewModel{
     userProfile:KnockoutObservable<UserProfile> = ko.observable(new UserProfile())
 
@@ -109,3 +114,4 @@ class HelloViewModel{
 }
 
 ko.applyBindings(new HelloViewModel())
+*/

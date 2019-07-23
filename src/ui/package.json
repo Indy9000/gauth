@@ -2,7 +2,7 @@
   "name": "gauth",
   "version": "1.0.0",
   "description": "template application for google auth",
-  "main": "hello.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
